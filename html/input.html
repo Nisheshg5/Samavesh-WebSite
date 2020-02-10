@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>SAMAVESH</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link href="../img/favicon.png" rel="icon">
+	<link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+	<link href="https://fonts.googleapis.com/css?family=Lobster&display=swap" rel="stylesheet" />
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	<link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+	<style>
+		input {
+			font-size: 30px;
+		}
+
+		button {
+			display: inline;
+			background-color: rgb(200, 200, 220);
+			border: 4;
+			font-size: 20px;
+			border-radius: 12px;
+			padding: 8px 8px;
+			text-align: center;
+			transform: translate(50%, 70%);
+		}
+
+		button:hover {
+			border: 1;
+			background-color: rgb(255, 102, 100);
+			opacity: 0.9;
+		}
+
+		.Heading {
+			font-family: "Lobster", cursive;
+		}
+
+		body {
+			background-color: #fffdd0;
+		}
+
+		table {
+			margin: 50px;
+		}
+
+		td {
+			padding: 5px !important;
+		}
+
+		img {
+			width: 500px !important;
+			height: auto;
+		}
+
+		.menu-icon:hover {
+			text-decoration: none !important;
+		}
+
+		#upload {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<nav style="background-color:#00b8d4;">
+		<div class="nav-wrapper">
+			<a id="menu-icon menu-icon" style="text-decoration: none;" href="#" data-target="mobile-demo"
+				class="sidenav-trigger"><i class="material-icons fa fa-bars menu-icon"></i>
+			</a>
+			<ul class="left hide-on-med-and-down">
+				<li class="homw"><a href="SRFID.html">Go Back</a></li>
+			</ul>
+			<ul class="right hide-on-med-and-down">
+				<li class="login"><a href="login.html">Login</a></li>
+				<li class="signup"><a href="signup.html">Signup</a></li>
+				<li class="logout"><a href="logout.html">Logout</a></li>
+			</ul>
+		</div>
+	</nav style="background-color:#00b8d4;">
+	<ul class="sidenav" id="mobile-demo">
+		<li class="home"><a href="SRFID.html">Go Back</a></li>
+		<li class="login"><a href="login.html">Login</a></li>
+		<li class="signup"><a href="signup.html">Signup</a></li>
+		<li class="logout"><a href="logout.html">Logout</a></li>
+	</ul><br>
+	<div class="container">
+		<div class="Heading">
+			<h1>You can check and insert reports here</h1>
+		</div>
+		<table>
+			<thead>
+				<td style="min-width: 200px; padding-bottom: 30px!important;font-family:Lobster;font-size: 40px;">
+					Number
+				</td>
+				<td style="padding-bottom: 30px!important;font-family:Lobster;font-size: 40px;">Image</td>
+			</thead>
+
+		</table>
+		<form action="upload">
+			<div id="upload" class="file-field input-field">
+				<div id="" class="btn">
+					<span>File</span>
+					<input type="file" accept="*/image"></input>
+				</div>
+				<div class="file-path-wrapper">
+					<input class="file-path validate" type="text">
+				</div>
+			</div>
+			<!-- <button id="button">Upload Here!</button> -->
+		</form>
+	</div>
+</body>
+
+<script>
+	$(document).ready(function () {
+		$('.sidenav').sidenav();
+	});
+</script>
+<script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-storage.js"></script>
+<script src="../js/app.js"></script>
+<script>
+	$(document).ready(function () {
+		firebase.auth().onAuthStateChanged(user => {
+			if (user) {
+				$("#upload").css("display", "block");
+				$(".login").hide();
+				$(".signup").hide();
+				$(".logout").show();
+			} else {
+				$("#upload").css("display", "none");
+				$(".login").show();
+				$(".signup").show();
+				$(".logout").hide();
+			}
+		})
+		var storageRef = firebase.storage().ref();
+		var z = 1;
+		(async function theLoop(i) {
+			var table = $("table");
+			try {
+				var imageRef = await storageRef
+					.child(
+						localStorage.getItem("signature") +
+						"-Medical-" +
+						i +
+						".jpeg"
+					)
+					.getDownloadURL()
+					.then(function (url) {
+						var tr =
+							"<tr><td style=\"" + "font-family:Lobster;font-size: 40px;\">" +
+							i +
+							'</td><td> <img src="' +
+							url +
+							'"/> </td></tr>';
+						table.append(tr);
+					});
+
+				theLoop(++i);
+			} catch (error) {
+				console.log("Stopped At: " + parseInt(i));
+				z = i;
+				return 0;
+			}
+		})(z);
+
+		$("input[type=file]").change(function (event) {
+			/* Act on the event */
+			file = event.target.files[0];
+			var storageRef = firebase
+				.storage()
+				.ref(localStorage.getItem("signature") + "-Medical-" + z + ".jpeg");
+
+			// Upload File
+			var task = storageRef.put(file);
+
+			// Update progress bar
+			task.on(
+				"state_changed",
+
+				function progress(snapshot) {
+					var percentage =
+						(snapshot.bytesTransferred / snapshot.totalBytes) *
+						100;
+					console.log(
+						"Bytes transferred: " +
+						snapshot.bytesTransferred +
+						"	Percentage Completed: " +
+						percentage +
+						"%"
+					);
+				},
+
+				function error(err) {
+					console.log("Error:" + err.message);
+				},
+
+				function complete() {
+					console.log("Image Uploaded");
+					var storageRef = firebase.storage().ref();
+					var imageRef = storageRef.child(
+						localStorage.getItem("signature") + "-Medical-" + z + ".jpeg"
+					);
+					imageRef.getDownloadURL().then(function (url) {
+						var tr =
+							"<tr><td style=\"" + "font-family:Lobster;font-size: 40px;\">" +
+							z +
+							'</td><td> <img style="font-size:30px;" src="' +
+							url +
+							'"/> </td></tr>';
+						var table = $("table");
+						table.append(tr);
+						// $("#img").attr("src", url);
+						z++;
+					});
+				}
+			);
+		});
+	});
+</script>
+
+</html>
